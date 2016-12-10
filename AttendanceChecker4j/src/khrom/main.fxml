@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+<TabPane fx:id="tabpane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="400.0" minWidth="600.0" prefHeight="400.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="khrom.Controller">
+    <tabs>
+        <Tab fx:id="tab1" text="Untitled Tab 1">
+            <content>
+                <VBox prefHeight="200.0" prefWidth="100.0">
+                    <children>
+                        <ToolBar fx:id="toolbar" nodeOrientation="RIGHT_TO_LEFT" prefHeight="40.0" prefWidth="483.0">
+                            <items>
+                                <ToggleButton fx:id="fullscreen" mnemonicParsing="false" onAction="#toggleHandler" text="全画面ボタン" />
+                            </items>
+                        </ToolBar>
+
+
+                        <HBox alignment="CENTER" prefHeight="526.0" prefWidth="600.0">
+                            <children>
+                                <VBox alignment="CENTER" prefHeight="438.0" prefWidth="600.0">
+                                    <children>
+                                        <GridPane prefHeight="195.0" prefWidth="600.0">
+                                            <columnConstraints>
+                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="189.0" minWidth="10.0" prefWidth="129.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="363.0" minWidth="10.0" prefWidth="329.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" maxWidth="195.0" minWidth="10.0" prefWidth="130.0" />
+                                            </columnConstraints>
+                                            <rowConstraints>
+                                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                <RowConstraints maxHeight="59.0" minHeight="10.0" prefHeight="13.0" vgrow="SOMETIMES" />
+                                                <RowConstraints maxHeight="117.0" minHeight="10.0" prefHeight="117.0" vgrow="SOMETIMES" />
+                                            </rowConstraints>
+                                            <children>
+                                                <TextField fx:id="gakuseki" alignment="CENTER" maxWidth="335.0" minHeight="30.0" minWidth="300.0" onAction="#onInsertData" prefHeight="30.0" prefWidth="335.0" promptText="学籍番号入れて！中に！" GridPane.columnIndex="1" />
+                                                <Label text="記録件数" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                                                <ListView minWidth="300.0" prefHeight="76.0" prefWidth="333.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                                <Label text="データ入れてね" GridPane.columnIndex="1" GridPane.rowIndex="1" fx:id="gakusekiNumber"/>
+                                            </children>
+                                        </GridPane>
+
+                                    </children>
+                                </VBox>
+                            </children>
+                        </HBox>
+                    </children>
+                </VBox>
+            </content>
+        </Tab>
+        <Tab fx:id="tab2" text="Untitled Tab 2" />
+    </tabs>
+</TabPane>
