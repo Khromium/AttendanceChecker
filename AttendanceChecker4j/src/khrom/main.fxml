@@ -15,7 +15,7 @@
 
 <TabPane fx:id="tabpane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="400.0" minWidth="600.0" prefHeight="400.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="khrom.Controller">
     <tabs>
-        <Tab fx:id="tab1" text="Untitled Tab 1">
+        <Tab fx:id="tab1" text="出席確認">
             <content>
                 <VBox prefHeight="200.0" prefWidth="100.0">
                     <children>
@@ -57,6 +57,7 @@
                 </VBox>
             </content>
         </Tab>
-        <Tab fx:id="tab2" text="Untitled Tab 2" />
+        <Tab fx:id="tab2" text="データ処理" />
+        <Tab fx:id="tab3" text="その他" />
     </tabs>
 </TabPane>
