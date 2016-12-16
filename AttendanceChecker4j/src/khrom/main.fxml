@@ -48,7 +48,7 @@
                                                 <Label text="記録件数" GridPane.columnIndex="2" GridPane.rowIndex="1" />
                                                 <ListView minWidth="300.0" prefHeight="76.0" prefWidth="333.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                                                 <Label fx:id="gakusekiNumber" text="データ入れてね" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                                    <Button mnemonicParsing="false" prefHeight="34.0" prefWidth="66.0" text="登録" GridPane.columnIndex="2" />
+                                    <Button mnemonicParsing="false" prefHeight="34.0" prefWidth="66.0" text="登録" GridPane.columnIndex="2" onAction="#onInsertData" />
                                             </children>
                                         </GridPane>
 
