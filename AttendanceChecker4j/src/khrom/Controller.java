@@ -1,14 +1,15 @@
 package khrom;
 
-import javafx.beans.property.ReadOnlyBooleanProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.*;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -25,6 +26,8 @@ public class Controller {
     private TabPane tabpane;
     @FXML
     private Label gakusekiNumber;
+    @FXML
+    private ListView listView;
 
     public void toggleHandler(ActionEvent event) {
         switch (((ToggleButton) event.getSource()).getId()) {
@@ -43,7 +46,9 @@ public class Controller {
         System.out.println();
         if (isGakuseki(gakuseki.getText())) {
             addDB("tst.db", gakuseki.getText());
-            gakusekiNumber.setText(gakuseki.getText() + "を追加しました");
+            gakusekiNumber.setText((gakuseki.getText().length() == 10 ? new StringBuilder(gakuseki.getText()).substring(5) : gakuseki.getText())
+                    + "を追加しました");
+            logger("add:" + (gakuseki.getText().length() == 10 ? new StringBuilder(gakuseki.getText()).substring(5) : gakuseki.getText()), false);
             gakuseki.setText("");
         } else {
             gakusekiNumber.setText("データが正しくないです");
@@ -130,13 +135,13 @@ public class Controller {
                     String.valueOf(String.format("%02d", calendar.get(Calendar.DATE))) +
                     String.valueOf(String.format("%02d", calendar.get(Calendar.HOUR))) +
                     String.valueOf(String.format("%02d", calendar.get(Calendar.MINUTE))) +
-                    String.valueOf(String.format("%02d", calendar.get(Calendar.SECOND))) +
-                    String.valueOf(calendar.get(Calendar.MILLISECOND));
+                    String.valueOf(String.format("%02d", calendar.get(Calendar.SECOND)));
             pstmtOrigin.setDouble(1, Double.parseDouble(date));
             pstmtOrigin.setString(2, number);
             pstmtOrigin.addBatch();
             pstmtOrigin.executeBatch();
             connOrigin.commit();
+
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (SQLException e) {
@@ -150,6 +155,45 @@ public class Controller {
                     e.printStackTrace();
                 }
             }
+        }
+    }
+
+    /**
+     * ログをコンソールとテキストで出力します。
+     * 問題が発生したとき用
+     * @param text
+     * @param isError
+     */
+    public void logger(String text, boolean isError) {
+        Label label = new Label(text);
+        if (isError) label.setStyle("-fx-text-fill: red;");
+        listView.getItems().add(0, label);
+        try {
+
+            save2txt(text, "activity.log", true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * テキストのデータ保存
+     * @param data テキストデータ
+     * @param fileName 出力ファイル名
+     * @param add ファイルに追記するかどうか
+     * @throws IOException
+     */
+    private void save2txt(String data, String fileName, boolean add) throws IOException {
+        BufferedWriter wr;
+        try {
+            wr = new BufferedWriter(new FileWriter(fileName, add));
+            wr.write(data);
+            wr.write("\n");
+            wr.flush();
+            wr.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(-1);
         }
     }
 
