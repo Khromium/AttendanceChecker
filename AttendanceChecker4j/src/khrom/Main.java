@@ -18,7 +18,6 @@ public class Main extends Application {
         controller.setStage(primaryStage);
         primaryStage.show();
         controller.setFieldFocus();
-//        controller.setTabListener();　//なんか動かんので消しておく
     }
 
 
