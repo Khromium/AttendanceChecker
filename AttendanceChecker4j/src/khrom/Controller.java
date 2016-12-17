@@ -12,12 +12,12 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.sql.*;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.regex.Pattern;
 
 public class Controller {
+    private String DB_NAME = "gakuseki.db";
     private Stage stage;
     @FXML
     private TextField gakuseki;
@@ -46,7 +46,6 @@ public class Controller {
 //    @FXML
 //    private Button excelbutton;
 
-    public static String DB_NAME = "gakuseki.db";
 
     public void toggleHandler(ActionEvent event) {
         switch (((ToggleButton) event.getSource()).getId()) {
@@ -88,7 +87,7 @@ public class Controller {
     public void onInsertData() {
         System.out.println();
         if (isGakuseki(gakuseki.getText())) {
-            addDB(gakuseki.getText());
+            new DataBase(DB_NAME).addDB(gakuseki.getText());
             gakusekiNumber.setText((gakuseki.getText().length() == 10 ? new StringBuilder(gakuseki.getText()).substring(5) : gakuseki.getText())
                     + "を追加しました");
             logger("add:" + (gakuseki.getText().length() == 10 ? new StringBuilder(gakuseki.getText()).substring(5) : gakuseki.getText()), false);
@@ -128,99 +127,6 @@ public class Controller {
     }
 
 
-    public synchronized void addDB(String number) {//マルチスレッド用に synchronizedをつけている
-        Connection connOrigin = null;
-        Statement stmt;
-        Properties prop = new Properties();
-        prop.put("journal_mode", "MEMORY");//必要はないが高速化のため
-        prop.put("sync_mode", "OFF");//高速化のため
-        String dbHead = "jdbc:sqlite:./";
-        PreparedStatement pstmtOrigin;
-
-        try {
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTimeZone(TimeZone.getTimeZone("Asia/Tokyo"));
-            //準備(Cドライブにあるsqlite_sampleフォルダに作成します)
-            Class.forName("org.sqlite.JDBC");
-            connOrigin = DriverManager.getConnection(dbHead + DB_NAME, prop);
-            connOrigin.setAutoCommit(false);
-            stmt = connOrigin.createStatement();
-            //ツイートID，緯度，経度，場所，ユーザID，スクリーン名，リプライ先ID，ツイート日，ツイートテキスト，ハッシュタグ，URL，ユーザ詳細,プロフィール内の位置情報
-            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS tenko ( date_time INTEGER, number TEXT)");
-
-            pstmtOrigin = connOrigin.prepareStatement("INSERT INTO tenko VALUES (?, ?)");
-            String date = String.valueOf(calendar.get(Calendar.YEAR)) +
-                    String.valueOf(String.format("%02d", calendar.get(Calendar.MONTH) + 1)) +
-                    String.valueOf(String.format("%02d", calendar.get(Calendar.DATE))) +
-                    String.valueOf(String.format("%02d", calendar.get(Calendar.HOUR_OF_DAY))) +
-                    String.valueOf(String.format("%02d", calendar.get(Calendar.MINUTE))) +
-                    String.valueOf(String.format("%02d", calendar.get(Calendar.SECOND)));
-            pstmtOrigin.setDouble(1, Double.parseDouble(date));
-            pstmtOrigin.setString(2, number);
-            pstmtOrigin.addBatch();
-            pstmtOrigin.executeBatch();
-            connOrigin.commit();
-
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            if (connOrigin != null) {
-                try {
-                    //接続を閉じる
-                    connOrigin.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-    public synchronized Set<String> readDB(String from, String to) {//マルチスレッド用に synchronizedをつけている
-        Connection connOrigin = null;
-        Set<String> gakuseki = new HashSet<>();
-        Properties prop = new Properties();
-        prop.put("journal_mode", "MEMORY");//必要はないが高速化のため
-        prop.put("sync_mode", "OFF");//高速化のため
-        String dbHead = "jdbc:sqlite:./";
-        PreparedStatement pstmtOrigin;
-
-        try {
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTimeZone(TimeZone.getTimeZone("Asia/Tokyo"));
-            //準備(Cドライブにあるsqlite_sampleフォルダに作成します)
-            Class.forName("org.sqlite.JDBC");
-            connOrigin = DriverManager.getConnection(dbHead + DB_NAME, prop);
-            connOrigin.setAutoCommit(false);
-//            stmt = connOrigin.createStatement();
-//            //ツイートID，緯度，経度，場所，ユーザID，スクリーン名，リプライ先ID，ツイート日，ツイートテキスト，ハッシュタグ，URL，ユーザ詳細,プロフィール内の位置情報
-//            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS tenko ( date_time INTEGER, number TEXT)");
-            // WHERE カラム >= 値1 AND カラム <= 値2;
-//            System.out.println("SELECT * FROM tenko WHERE date_time >= " + from + " AND date_time <=" + to);
-
-            pstmtOrigin = connOrigin.prepareStatement("SELECT * FROM tenko WHERE date_time >= " + from + " AND date_time <=" + to);
-            ResultSet rs = pstmtOrigin.executeQuery();
-            while (rs.next()) {
-                gakuseki.add(rs.getString(2));
-            }
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            if (connOrigin != null) {
-                try {
-                    //接続を閉じる
-                    connOrigin.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return gakuseki;
-    }
-
     public void saveDB2txt() throws IOException {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("保存ファイル選択");
@@ -233,7 +139,7 @@ public class Controller {
         }
         List<String> list = new ArrayList<>();
         list.addAll(
-                readDB(
+                new DataBase(DB_NAME).readDB(
                         fromDate.getValue().toString().replaceAll("-", "") +
                                 String.format("%02d", Integer.parseInt((String) fromHour.getValue())) +
                                 String.format("%02d", Integer.parseInt((String) fromMinute.getValue())) +
@@ -260,7 +166,6 @@ public class Controller {
         }
 
     }
-
 
 
     public String getDefaultFileName() {
