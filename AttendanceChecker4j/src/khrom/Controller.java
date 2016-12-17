@@ -43,6 +43,8 @@ public class Controller {
     private ChoiceBox toSecond;
     @FXML
     private DatePicker toDate;
+    @FXML
+    private Label history;
 //    @FXML
 //    private Button excelbutton;
 
@@ -85,11 +87,12 @@ public class Controller {
      * データ追加の部分
      */
     public void onInsertData() {
-        System.out.println();
+
         if (isGakuseki(gakuseki.getText())) {
             new DataBase(DB_NAME).addDB(gakuseki.getText());
             gakusekiNumber.setText((gakuseki.getText().length() == 10 ? new StringBuilder(gakuseki.getText()).substring(5) : gakuseki.getText())
                     + "を追加しました");
+            history.setText(String.valueOf(Integer.parseInt(history.getText()) + 1));
             logger("add:" + (gakuseki.getText().length() == 10 ? new StringBuilder(gakuseki.getText()).substring(5) : gakuseki.getText()), false);
             gakuseki.setText("");
         } else {

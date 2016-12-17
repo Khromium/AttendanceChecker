@@ -61,9 +61,8 @@
                                             <children>
                                                 <TextField fx:id="gakuseki" alignment="CENTER" maxWidth="335.0"
                                                            minHeight="30.0" minWidth="300.0" onAction="#onInsertData"
-                                                           prefHeight="30.0" prefWidth="335.0" promptText="学籍番号入れて！中に！"
+                                                           prefHeight="30.0" prefWidth="335.0" promptText="学籍番号入れて！"
                                                            GridPane.columnIndex="1"/>
-                                                <Label text="記録件数" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
                                                 <ListView fx:id="listView" minWidth="300.0" prefHeight="179.0"
                                                           prefWidth="333.0" GridPane.columnIndex="1"
                                                           GridPane.rowIndex="2"/>
@@ -72,6 +71,13 @@
                                                 <Button mnemonicParsing="false" onAction="#onInsertData"
                                                         prefHeight="34.0" prefWidth="66.0" text="登録"
                                                         GridPane.columnIndex="2"/>
+                                                <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="2"
+                                                      GridPane.rowIndex="1">
+                                                    <children>
+                                                        <Label text="記録件数"/>
+                                                        <Label text="0" fx:id="history"/>
+                                                    </children>
+                                                </HBox>
                                             </children>
                                         </GridPane>
 
@@ -102,7 +108,7 @@
                                 </Label>
                                 <HBox alignment="CENTER_LEFT" prefHeight="40.0" prefWidth="630.0">
                                     <children>
-                                        <DatePicker fx:id="fromDate" prefHeight="27.0" prefWidth="115.0"/>
+                                        <DatePicker fx:id="fromDate" prefHeight="27.0" prefWidth="110.0"/>
                                         <ChoiceBox fx:id="fromHour" prefHeight="27.0" prefWidth="50.0"/>
                                         <VBox alignment="BOTTOM_LEFT" prefHeight="40.0" prefWidth="14.0">
                                             <children>
@@ -132,7 +138,7 @@
                                                 <Font size="8.0"/>
                                             </font>
                                         </Label>
-                                        <DatePicker fx:id="toDate" prefHeight="27.0" prefWidth="115.0"/>
+                                        <DatePicker fx:id="toDate" prefHeight="27.0" prefWidth="110.0"/>
                                         <ChoiceBox fx:id="toHour" prefHeight="27.0" prefWidth="50.0"/>
                                         <VBox alignment="BOTTOM_LEFT" prefHeight="40.0" prefWidth="14.0">
                                             <children>
@@ -161,9 +167,10 @@
                                 </HBox>
                                 <HBox alignment="CENTER_LEFT" prefHeight="40.0" prefWidth="610.0">
                                     <children>
-                                        <Button mnemonicParsing="false" onAction="#saveDB2txt" text="テキストファイル"
-                                                fx:id="txtbutton"/>
-                                        <!--<Button mnemonicParsing="false" onAction="#saveDB2excel" text="エクセル" fx:id="excelButton"/>-->
+                                        <Button fx:id="txtbutton" mnemonicParsing="false" onAction="#saveDB2txt"
+                                                text="テキストファイル"/>
+                                        <!--<Button fx:id="excelButton" mnemonicParsing="false" onAction="#saveDB2excel"-->
+                                                <!--text="エクセル"/>-->
                                     </children>
                                     <padding>
                                         <Insets left="10.0"/>
