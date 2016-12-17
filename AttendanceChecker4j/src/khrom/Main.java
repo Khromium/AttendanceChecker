@@ -13,9 +13,12 @@ public class Main extends Application {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("main.fxml"));
         Parent root = fxmlLoader.load();
         primaryStage.setTitle("出欠とるよ！");
-        primaryStage.setScene(new Scene(root, 600, 400));
+        primaryStage.setScene(new Scene(root, 620, 400));
+        primaryStage.setMinHeight(400);
+        primaryStage.setMinWidth(620);
         Controller controller = fxmlLoader.getController();
         controller.setStage(primaryStage);
+        controller.setChoice();
         primaryStage.show();
         controller.setFieldFocus();
     }
