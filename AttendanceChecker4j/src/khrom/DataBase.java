@@ -7,18 +7,15 @@ import java.util.*;
  * DB関連の処理
  */
 public class DataBase {
-    private String DB_NAME = "gakuseki.db";
+//    private String DB_NAME = "gakuseki.db";
 
-    public DataBase(String DBName) {
-        DB_NAME = DBName;
-    }
 
     /**
      * DBにデータを加えます
      *
      * @param number
      */
-    public synchronized void addDB(String number) {//マルチスレッド用に synchronizedをつけている
+    public static synchronized void addDB(String dbName, String number) {//デッドロックすることがあるのでsynchronized
         Connection connOrigin = null;
         Statement stmt;
         Properties prop = new Properties();
@@ -31,10 +28,10 @@ public class DataBase {
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeZone(TimeZone.getTimeZone("Asia/Tokyo"));
             Class.forName("org.sqlite.JDBC");
-            connOrigin = DriverManager.getConnection(dbHead + DB_NAME, prop);
+            connOrigin = DriverManager.getConnection(dbHead + dbName, prop);
             connOrigin.setAutoCommit(false);
             stmt = connOrigin.createStatement();
-            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS tenko ( date_time INTEGER, number TEXT)");
+            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS tenko ( date_time INTEGER, number String)");
 
             pstmtOrigin = connOrigin.prepareStatement("INSERT INTO tenko VALUES (?, ?)");
             String date = String.valueOf(calendar.get(Calendar.YEAR)) +
@@ -73,7 +70,7 @@ public class DataBase {
      * @param to
      * @return
      */
-    public synchronized Set<String> readDB(String from, String to) {//マルチスレッド用に synchronizedをつけている
+    public static Set<String> readDB(String dbName, String from, String to) {
         Connection connOrigin = null;
         Set<String> gakuseki = new HashSet<>();
         Properties prop = new Properties();
@@ -86,7 +83,7 @@ public class DataBase {
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeZone(TimeZone.getTimeZone("Asia/Tokyo"));
             Class.forName("org.sqlite.JDBC");
-            connOrigin = DriverManager.getConnection(dbHead + DB_NAME, prop);
+            connOrigin = DriverManager.getConnection(dbHead + dbName, prop);
             connOrigin.setAutoCommit(false);
             pstmtOrigin = connOrigin.prepareStatement("SELECT * FROM tenko WHERE date_time >= " + from + " AND date_time <=" + to);
             ResultSet rs = pstmtOrigin.executeQuery();

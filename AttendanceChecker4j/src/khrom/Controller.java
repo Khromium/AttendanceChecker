@@ -7,11 +7,10 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.sqlite.core.DB;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.nio.ByteBuffer;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -59,6 +58,54 @@ public class Controller {
     }
 
     /**
+     * 点呼ソフトver1,ver2で出力されるバイナリファイルの読み込み場所
+     *
+     * @throws IOException
+     */
+    public List<String> readOldBinary() throws IOException {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("保存ファイル選択");
+        fileChooser.setInitialFileName(getDefaultFileName() + ".bin");
+        fileChooser.setInitialDirectory(new File("./"));
+        File openFile = fileChooser.showOpenDialog(stage);
+        if (openFile == null) {
+            logger("ファイルが選択されていません", false);
+            return null;
+        }
+        return OldVersion.read(openFile);
+    }
+
+    /**
+     * 点呼ソフトver1,ver2で出力されるバイナリファイル形式の出力
+     *
+     * @throws IOException
+     */
+    public void writeOldBinary() throws IOException {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("保存ファイル選択");
+        fileChooser.setInitialFileName(getDefaultFileName() + ".bin");
+        fileChooser.setInitialDirectory(new File("./"));
+        File saveFile = fileChooser.showSaveDialog(stage);
+        if (saveFile == null) {
+            logger("ファイルが選択されていません", false);
+            return;
+        }
+        List<String> list = new ArrayList<>();
+        list.addAll(
+                DataBase.readDB(DB_NAME,
+                        fromDate.getValue().toString().replaceAll("-", "") +
+                                String.format("%02d", Integer.parseInt((String) fromHour.getValue())) +
+                                String.format("%02d", Integer.parseInt((String) fromMinute.getValue())) +
+                                String.format("%02d", Integer.parseInt((String) fromSecond.getValue())),
+                        toDate.getValue().toString().replaceAll("-", "") +
+                                String.format("%02d", Integer.parseInt((String) toHour.getValue())) +
+                                String.format("%02d", Integer.parseInt((String) toMinute.getValue())) +
+                                String.format("%02d", Integer.parseInt((String) toSecond.getValue()))));
+
+        OldVersion.write(saveFile, list);
+    }
+
+    /**
      * 選択肢の追加
      */
     public void setChoice() {
@@ -89,11 +136,11 @@ public class Controller {
     public void onInsertData() {
 
         if (isGakuseki(gakuseki.getText())) {
-            new DataBase(DB_NAME).addDB(gakuseki.getText());
-            gakusekiNumber.setText((gakuseki.getText().length() == 10 ? new StringBuilder(gakuseki.getText()).substring(5) : gakuseki.getText())
-                    + "を追加しました");
+            String numberString = gakuseki.getText().length() == 10 ? new StringBuilder(gakuseki.getText()).substring(5) : gakuseki.getText();
+            DataBase.addDB(DB_NAME, numberString);
+            gakusekiNumber.setText(numberString + "を追加しました");
             history.setText(String.valueOf(Integer.parseInt(history.getText()) + 1));
-            logger("add:" + (gakuseki.getText().length() == 10 ? new StringBuilder(gakuseki.getText()).substring(5) : gakuseki.getText()), false);
+            logger("add:" + numberString, false);
             gakuseki.setText("");
         } else {
             gakusekiNumber.setText("データが正しくないです");
@@ -142,7 +189,7 @@ public class Controller {
         }
         List<String> list = new ArrayList<>();
         list.addAll(
-                new DataBase(DB_NAME).readDB(
+                DataBase.readDB(DB_NAME,
                         fromDate.getValue().toString().replaceAll("-", "") +
                                 String.format("%02d", Integer.parseInt((String) fromHour.getValue())) +
                                 String.format("%02d", Integer.parseInt((String) fromMinute.getValue())) +
@@ -171,14 +218,16 @@ public class Controller {
     }
 
 
+    /**
+     * デフォルトのファイル名を取ってくる。
+     * 命名規則は普段の点呼の再現
+     *
+     * @return
+     */
     public String getDefaultFileName() {
-        String amPM = null;
+        String amPM;
         amPM = String.valueOf(Calendar.getInstance().get(Calendar.DATE));
-        if (Calendar.getInstance().get(Calendar.AM_PM) == Calendar.PM) {
-            amPM += "pm";
-        } else {
-            amPM += "am";
-        }
+        amPM += Calendar.getInstance().get(Calendar.AM_PM) == Calendar.PM ? "pm" : "am";
         return amPM;
     }
 
