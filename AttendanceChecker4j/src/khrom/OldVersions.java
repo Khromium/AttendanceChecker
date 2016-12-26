@@ -6,12 +6,14 @@ import javafx.stage.Stage;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 昔の形式のファイルの読み書き
  */
-public class OldVersion {
+public class OldVersions {
     /**
      * 点呼ソフトver1,ver2で出力されるバイナリファイルの読み込み場所
      *
@@ -19,8 +21,8 @@ public class OldVersion {
      * @return 読み取りデータ
      * @throws IOException
      */
-    private static List<String> read(File inFile) throws IOException {
-        List<String> resultList = new ArrayList<>();
+    private static Set<String> read(File inFile) throws IOException {
+        Set<String> resultList = new HashSet<>();
         DataInputStream dataInStream = new DataInputStream(new BufferedInputStream(new FileInputStream(inFile.getPath())));
         byte buf[] = new byte[2];
         byte[] swap = new byte[4];
@@ -67,7 +69,7 @@ public class OldVersion {
      *
      * @throws IOException
      */
-    public static List<String> readOldBinary(Stage stage) throws IOException {
+    public static Set<String> readOldBinary(Stage stage) throws IOException {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("読み込みファイル選択");
         fileChooser.setInitialFileName(DateUtils.getDefaultFileName() + ".bin");
@@ -77,7 +79,7 @@ public class OldVersion {
         if (openFile == null) {
             return null;
         }
-        return OldVersion.read(openFile);
+        return OldVersions.read(openFile);
     }
 
     /**
@@ -99,6 +101,6 @@ public class OldVersion {
         list.addAll(
                 DataBase.readDB(Controller.DB_NAME, fromDate, toDate));
 
-        OldVersion.write(saveFile, list);
+        OldVersions.write(saveFile, list);
     }
 }

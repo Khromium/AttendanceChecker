@@ -107,4 +107,46 @@ public class DataBase {
         return gakuseki;
     }
 
+    /**
+     * DBから重複を取り除いた学籍番号データを取得します。
+     *
+     * @return
+     */
+    public static Set<String> readAllData(String dbName) {
+        Connection connOrigin = null;
+        Set<String> gakuseki = new HashSet<>();
+        Properties prop = new Properties();
+        prop.put("journal_mode", "MEMORY");//必要はないが高速化のため
+        prop.put("sync_mode", "OFF");//高速化のため
+        String dbHead = "jdbc:sqlite:./";
+        PreparedStatement pstmtOrigin;
+
+        try {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeZone(TimeZone.getTimeZone("Asia/Tokyo"));
+            Class.forName("org.sqlite.JDBC");
+            connOrigin = DriverManager.getConnection(dbHead + dbName, prop);
+            connOrigin.setAutoCommit(false);
+            pstmtOrigin = connOrigin.prepareStatement("SELECT * FROM tenko");
+            ResultSet rs = pstmtOrigin.executeQuery();
+            while (rs.next()) {
+                gakuseki.add(rs.getString(2));
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (connOrigin != null) {
+                try {
+                    //接続を閉じる
+                    connOrigin.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return gakuseki;
+    }
+
 }

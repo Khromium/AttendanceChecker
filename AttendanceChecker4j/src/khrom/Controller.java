@@ -37,6 +37,8 @@ public class Controller implements EventHandler<ActionEvent> {
     private Button reg;
     @FXML
     private Button binbutton, txtbutton;
+    @FXML
+    private Button filepicker, output;
 
 
     /**
@@ -51,6 +53,8 @@ public class Controller implements EventHandler<ActionEvent> {
         reg.setOnAction(this);
         binbutton.setOnAction(this);
         txtbutton.setOnAction(this);
+        filepicker.setOnAction(this);
+        output.setOnAction(this);
         setChoice();
     }
 
@@ -122,12 +126,38 @@ public class Controller implements EventHandler<ActionEvent> {
     }
 
 
-
     public void setFieldFocus() {
         tabpane.setFocusTraversable(false);
         gakuseki.requestFocus();
     }
 
+    public List<File> selectFiles() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("学籍ファイル選択");
+        fileChooser.setInitialFileName(DateUtils.getDefaultFileName() + ".txt");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("numbers file", "*.txt", "*.bin", "*.db"));
+        fileChooser.setInitialDirectory(new File("./"));
+        return fileChooser.showOpenMultipleDialog(stage);
+    }
+
+    public Set<String> getAllfileData(List<File> files) throws IOException {
+        Set<String> numbers = new HashSet<>();
+        for (File file : files) {
+            String[] tmp = file.getName().split(".");
+            switch (tmp[tmp.length - 1]) {
+                case "txt":
+                    numbers.addAll(readFile(file.getPath()));
+                    break;
+                case "bin":
+                    numbers.addAll(OldVersions.readOldBinary(stage));
+                    break;
+                case "db":
+                    numbers.addAll(DataBase.readAllData(DB_NAME));
+                    break;
+            }
+        }
+        return numbers;
+    }
 
     public void saveDB2txt() throws IOException {
         FileChooser fileChooser = new FileChooser();
@@ -197,8 +227,24 @@ public class Controller implements EventHandler<ActionEvent> {
         }
     }
 
+    public Set<String> readFile(String fName) {
+        Set<String> res = new HashSet<>();
+        String str;
+        BufferedReader br;
+        try {
+            br = new BufferedReader(new InputStreamReader(new FileInputStream(fName), "UTF-8"));
+            while ((str = br.readLine()) != null) {
+                res.add(str);
+            }
+        } catch (Exception e) {//面倒なのでまとめる
+            e.printStackTrace();
+        }
+        return res;
+    }
+
+
     @Override
-    public void handle(ActionEvent event) {
+    public void handle(ActionEvent event) {//ifじゃないといけない
         Object src = event.getSource();
         if (src.equals(fullscreen)) {
             stage.setFullScreen(!stage.isFullScreen());
@@ -206,7 +252,7 @@ public class Controller implements EventHandler<ActionEvent> {
             insertData();
         } else if (src.equals(binbutton)) {
             try {
-                OldVersion.writeOldBinary(stage, fromDate.getValue().toString().replaceAll("-", "") +
+                OldVersions.writeOldBinary(stage, fromDate.getValue().toString().replaceAll("-", "") +
                                 String.format("%02d", Integer.parseInt((String) fromHour.getValue())) +
                                 String.format("%02d", Integer.parseInt((String) fromMinute.getValue())) +
                                 String.format("%02d", Integer.parseInt((String) fromSecond.getValue())),
@@ -223,6 +269,8 @@ public class Controller implements EventHandler<ActionEvent> {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }else if (src.equals(filepicker)){
+            selectFiles();
         }
     }
 }
