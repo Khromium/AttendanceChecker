@@ -1,6 +1,7 @@
 package khrom;
 
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -18,7 +19,7 @@ public class OldVersion {
      * @return 読み取りデータ
      * @throws IOException
      */
-    public static List<String> read(File inFile) throws IOException {
+    private static List<String> read(File inFile) throws IOException {
         List<String> resultList = new ArrayList<>();
         DataInputStream dataInStream = new DataInputStream(new BufferedInputStream(new FileInputStream(inFile.getPath())));
         byte buf[] = new byte[2];
@@ -43,7 +44,7 @@ public class OldVersion {
      * @return
      * @throws IOException
      */
-    public static void write(File outFile, List<String> numbers) throws IOException {
+    private static void write(File outFile, List<String> numbers) throws IOException {
         DataOutputStream dataOutputStream = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(outFile.getPath())));
         byte buf[] = new byte[2];
         for (String number : numbers) {
@@ -59,5 +60,45 @@ public class OldVersion {
         }
         dataOutputStream.flush();
         dataOutputStream.close();
+    }
+
+    /**
+     * 点呼ソフトver1,ver2で出力されるバイナリファイルの読み込み場所
+     *
+     * @throws IOException
+     */
+    public static List<String> readOldBinary(Stage stage) throws IOException {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("読み込みファイル選択");
+        fileChooser.setInitialFileName(DateUtils.getDefaultFileName() + ".bin");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("binary file", "*.bin"));
+        fileChooser.setInitialDirectory(new File("./"));
+        File openFile = fileChooser.showOpenDialog(stage);
+        if (openFile == null) {
+            return null;
+        }
+        return OldVersion.read(openFile);
+    }
+
+    /**
+     * 点呼ソフトver1,ver2で出力されるバイナリファイル形式の出力
+     *
+     * @throws IOException
+     */
+    public static void writeOldBinary(Stage stage, String fromDate, String toDate) throws IOException {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("保存ファイル選択");
+        fileChooser.setInitialFileName(DateUtils.getDefaultFileName() + ".bin");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("binary file", "*.bin"));
+        fileChooser.setInitialDirectory(new File("./"));
+        File saveFile = fileChooser.showSaveDialog(stage);
+        if (saveFile == null) {
+            return;
+        }
+        List<String> list = new ArrayList<>();
+        list.addAll(
+                DataBase.readDB(Controller.DB_NAME, fromDate, toDate));
+
+        OldVersion.write(saveFile, list);
     }
 }

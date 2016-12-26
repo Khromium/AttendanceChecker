@@ -3,20 +3,19 @@ package khrom;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import org.sqlite.core.DB;
 
 import java.io.*;
-import java.nio.ByteBuffer;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.regex.Pattern;
 
-public class Controller {
-    private String DB_NAME = "gakuseki.db";
+public class Controller implements EventHandler<ActionEvent> {
+    public static String DB_NAME = "gakuseki.db";
     private Stage stage;
     @FXML
     private TextField gakuseki;
@@ -27,85 +26,34 @@ public class Controller {
     @FXML
     private ListView listView;
     @FXML
-    private ChoiceBox fromHour;
+    private ChoiceBox fromHour, fromMinute, fromSecond, toHour, toMinute, toSecond;
     @FXML
-    private ChoiceBox fromMinute;
-    @FXML
-    private ChoiceBox fromSecond;
-    @FXML
-    private DatePicker fromDate;
-    @FXML
-    private ChoiceBox toHour;
-    @FXML
-    private ChoiceBox toMinute;
-    @FXML
-    private ChoiceBox toSecond;
-    @FXML
-    private DatePicker toDate;
+    private DatePicker fromDate, toDate;
     @FXML
     private Label history;
-//    @FXML
-//    private Button excelbutton;
+    @FXML
+    private ToggleButton fullscreen;
+    @FXML
+    private Button reg;
+    @FXML
+    private Button binbutton, txtbutton;
 
-
-    public void toggleHandler(ActionEvent event) {
-        switch (((ToggleButton) event.getSource()).getId()) {
-            case "fullscreen":
-                stage.setFullScreen(!stage.isFullScreen());
-                break;
-        }
-
-    }
 
     /**
-     * 点呼ソフトver1,ver2で出力されるバイナリファイルの読み込み場所
+     * 選択肢の追加やアクションのセットをここでまとめて行う
      *
-     * @throws IOException
+     * @param stage
      */
-    public List<String> readOldBinary() throws IOException {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("読み込みファイル選択");
-        fileChooser.setInitialFileName(getDefaultFileName() + ".bin");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("binary file", "*.bin"));
-        fileChooser.setInitialDirectory(new File("./"));
-        File openFile = fileChooser.showOpenDialog(stage);
-        if (openFile == null) {
-            logger("ファイルが選択されていません", false);
-            return null;
-        }
-        return OldVersion.read(openFile);
+    public void init(Stage stage) {
+        setStage(stage);
+        fullscreen.setOnAction(this);
+        gakuseki.setOnAction(this);
+        reg.setOnAction(this);
+        binbutton.setOnAction(this);
+        txtbutton.setOnAction(this);
+        setChoice();
     }
 
-    /**
-     * 点呼ソフトver1,ver2で出力されるバイナリファイル形式の出力
-     *
-     * @throws IOException
-     */
-    public void writeOldBinary() throws IOException {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("保存ファイル選択");
-        fileChooser.setInitialFileName(getDefaultFileName() + ".bin");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("binary file", "*.bin"));
-        fileChooser.setInitialDirectory(new File("./"));
-        File saveFile = fileChooser.showSaveDialog(stage);
-        if (saveFile == null) {
-            logger("ファイルが選択されていません", false);
-            return;
-        }
-        List<String> list = new ArrayList<>();
-        list.addAll(
-                DataBase.readDB(DB_NAME,
-                        fromDate.getValue().toString().replaceAll("-", "") +
-                                String.format("%02d", Integer.parseInt((String) fromHour.getValue())) +
-                                String.format("%02d", Integer.parseInt((String) fromMinute.getValue())) +
-                                String.format("%02d", Integer.parseInt((String) fromSecond.getValue())),
-                        toDate.getValue().toString().replaceAll("-", "") +
-                                String.format("%02d", Integer.parseInt((String) toHour.getValue())) +
-                                String.format("%02d", Integer.parseInt((String) toMinute.getValue())) +
-                                String.format("%02d", Integer.parseInt((String) toSecond.getValue()))));
-
-        OldVersion.write(saveFile, list);
-    }
 
     /**
      * 選択肢の追加
@@ -135,7 +83,7 @@ public class Controller {
     /**
      * データ追加の部分
      */
-    public void onInsertData() {
+    public void insertData() {
 
         if (isGakuseki(gakuseki.getText())) {
             String numberString = gakuseki.getText().length() == 10 ? new StringBuilder(gakuseki.getText()).substring(5) : gakuseki.getText();
@@ -173,6 +121,8 @@ public class Controller {
         });
     }
 
+
+
     public void setFieldFocus() {
         tabpane.setFocusTraversable(false);
         gakuseki.requestFocus();
@@ -182,8 +132,8 @@ public class Controller {
     public void saveDB2txt() throws IOException {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("保存ファイル選択");
-        fileChooser.setInitialFileName(getDefaultFileName() + ".txt");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("text file","*.txt"));
+        fileChooser.setInitialFileName(DateUtils.getDefaultFileName() + ".txt");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("text file", "*.txt"));
         fileChooser.setInitialDirectory(new File("./"));
         File saveFile = fileChooser.showSaveDialog(stage);
         if (saveFile == null) {
@@ -206,33 +156,6 @@ public class Controller {
 
     }
 
-    public void saveDB2excel() throws IOException {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("保存ファイル選択");
-
-        fileChooser.setInitialFileName(getDefaultFileName() + ".xlsx");
-        fileChooser.setInitialDirectory(new File("./"));
-        File saveFile = fileChooser.showSaveDialog(stage);
-        if (saveFile == null) {
-            logger("ファイルが選択されていません", false);
-            return;
-        }
-
-    }
-
-
-    /**
-     * デフォルトのファイル名を取ってくる。
-     * 命名規則は普段の点呼の再現
-     *
-     * @return
-     */
-    public String getDefaultFileName() {
-        String amPM;
-        amPM = String.valueOf(Calendar.getInstance().get(Calendar.DATE));
-        amPM += Calendar.getInstance().get(Calendar.AM_PM) == Calendar.PM ? "pm" : "am";
-        return amPM;
-    }
 
     /**
      * ログをコンソールとテキストで出力します。
@@ -274,4 +197,32 @@ public class Controller {
         }
     }
 
+    @Override
+    public void handle(ActionEvent event) {
+        Object src = event.getSource();
+        if (src.equals(fullscreen)) {
+            stage.setFullScreen(!stage.isFullScreen());
+        } else if (src.equals(gakuseki) || src.equals(reg)) {
+            insertData();
+        } else if (src.equals(binbutton)) {
+            try {
+                OldVersion.writeOldBinary(stage, fromDate.getValue().toString().replaceAll("-", "") +
+                                String.format("%02d", Integer.parseInt((String) fromHour.getValue())) +
+                                String.format("%02d", Integer.parseInt((String) fromMinute.getValue())) +
+                                String.format("%02d", Integer.parseInt((String) fromSecond.getValue())),
+                        toDate.getValue().toString().replaceAll("-", "") +
+                                String.format("%02d", Integer.parseInt((String) toHour.getValue())) +
+                                String.format("%02d", Integer.parseInt((String) toMinute.getValue())) +
+                                String.format("%02d", Integer.parseInt((String) toSecond.getValue())));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else if (src.equals(txtbutton)) {
+            try {
+                saveDB2txt();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }

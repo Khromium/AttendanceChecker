@@ -17,8 +17,8 @@ public class Main extends Application {
         primaryStage.setMinHeight(400);
         primaryStage.setMinWidth(620);
         Controller controller = fxmlLoader.getController();
-        controller.setStage(primaryStage);
-        controller.setChoice();
+        controller.init(primaryStage);
+
         primaryStage.show();
         controller.setFieldFocus();
     }

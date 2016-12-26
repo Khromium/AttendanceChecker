@@ -26,7 +26,7 @@
                     <children>
                         <ToolBar fx:id="toolbar" nodeOrientation="RIGHT_TO_LEFT" prefHeight="40.0" prefWidth="483.0">
                             <items>
-                                <ToggleButton fx:id="fullscreen" mnemonicParsing="false" onAction="#toggleHandler" text="全画面ボタン" />
+                                <ToggleButton fx:id="fullscreen" mnemonicParsing="false"  text="全画面ボタン" />
                             </items>
                         </ToolBar>
 
@@ -47,10 +47,10 @@
                                                 <RowConstraints maxHeight="117.0" minHeight="10.0" prefHeight="117.0" vgrow="SOMETIMES" />
                                             </rowConstraints>
                                             <children>
-                                                <TextField fx:id="gakuseki" alignment="CENTER" maxWidth="335.0" minHeight="30.0" minWidth="300.0" onAction="#onInsertData" prefHeight="30.0" prefWidth="335.0" promptText="学籍番号入れて！" GridPane.columnIndex="1" />
+                                                <TextField fx:id="gakuseki" alignment="CENTER" maxWidth="335.0" minHeight="30.0" minWidth="300.0" prefHeight="30.0" prefWidth="335.0" promptText="学籍番号入れて！" GridPane.columnIndex="1" />
                                                 <ListView fx:id="listView" minWidth="300.0" prefHeight="179.0" prefWidth="333.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                                                 <Label fx:id="gakusekiNumber" text="データ入れてね" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                                                <Button mnemonicParsing="false" onAction="#onInsertData" prefHeight="34.0" prefWidth="66.0" text="登録" GridPane.columnIndex="2" />
+                                                <Button mnemonicParsing="false" fx:id="reg" prefHeight="34.0" prefWidth="66.0" text="登録" GridPane.columnIndex="2" />
                                                 <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="2" GridPane.rowIndex="1">
                                                     <children>
                                                         <Label text="記録件数" />
@@ -139,8 +139,8 @@
                                 </HBox>
                                 <HBox alignment="CENTER_LEFT" prefHeight="40.0" prefWidth="610.0">
                                     <children>
-                                        <Button fx:id="txtbutton" mnemonicParsing="false" onAction="#saveDB2txt" text="テキストファイル" />
-                              <Button mnemonicParsing="false" onAction="#writeOldBinary" text="バイナリ(古いのと互換)" />
+                                        <Button fx:id="txtbutton" mnemonicParsing="false"  text="テキストファイル" />
+                              <Button fx:id="binbutton" mnemonicParsing="false"  text="バイナリ(古いのと互換)" />
                                         <!--<Button fx:id="excelButton" mnemonicParsing="false" onAction="#saveDB2excel"-->
                                                 <!--text="エクセル"/>-->
                                     </children>
