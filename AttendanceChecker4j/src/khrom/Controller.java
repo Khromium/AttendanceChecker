@@ -64,8 +64,9 @@ public class Controller {
      */
     public List<String> readOldBinary() throws IOException {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("保存ファイル選択");
+        fileChooser.setTitle("読み込みファイル選択");
         fileChooser.setInitialFileName(getDefaultFileName() + ".bin");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("binary file", "*.bin"));
         fileChooser.setInitialDirectory(new File("./"));
         File openFile = fileChooser.showOpenDialog(stage);
         if (openFile == null) {
@@ -84,6 +85,7 @@ public class Controller {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("保存ファイル選択");
         fileChooser.setInitialFileName(getDefaultFileName() + ".bin");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("binary file", "*.bin"));
         fileChooser.setInitialDirectory(new File("./"));
         File saveFile = fileChooser.showSaveDialog(stage);
         if (saveFile == null) {
@@ -181,6 +183,7 @@ public class Controller {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("保存ファイル選択");
         fileChooser.setInitialFileName(getDefaultFileName() + ".txt");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("text file","*.txt"));
         fileChooser.setInitialDirectory(new File("./"));
         File saveFile = fileChooser.showSaveDialog(stage);
         if (saveFile == null) {
