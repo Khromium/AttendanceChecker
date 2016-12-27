@@ -187,6 +187,7 @@
                                 <HBox alignment="CENTER_RIGHT" prefHeight="32.0" prefWidth="391.0">
                                     <children>
                                         <Button mnemonicParsing="false" text="保存" fx:id="output"/>
+                                        <Button mnemonicParsing="false" text="クリア" fx:id="clear"/>
                                     </children>
                                 </HBox>
                             </children>

@@ -14,7 +14,7 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.regex.Pattern;
 
-public class Controller implements EventHandler<ActionEvent> {
+public class Controller {
     public static String DB_NAME = "gakuseki.db";
     private Stage stage;
     @FXML
@@ -38,7 +38,9 @@ public class Controller implements EventHandler<ActionEvent> {
     @FXML
     private Button binbutton, txtbutton;
     @FXML
-    private Button filepicker, output;
+    private Button filepicker, output, clear;
+    @FXML
+    private ListView filelist;
 
 
     /**
@@ -48,13 +50,14 @@ public class Controller implements EventHandler<ActionEvent> {
      */
     public void init(Stage stage) {
         setStage(stage);
-        fullscreen.setOnAction(this);
-        gakuseki.setOnAction(this);
-        reg.setOnAction(this);
-        binbutton.setOnAction(this);
-        txtbutton.setOnAction(this);
-        filepicker.setOnAction(this);
-        output.setOnAction(this);
+        fullscreen.setOnAction(event -> stage.setFullScreen(!stage.isFullScreen()));
+        gakuseki.setOnAction(event -> insertData());
+        reg.setOnAction(event -> insertData());
+        binbutton.setOnAction(event -> OldVersions.writeOldBinary(stage, getFromDateString(), getToDateString()));
+        txtbutton.setOnAction(event -> saveDB2txt());
+        filepicker.setOnAction(event -> addDraftFiles());
+        output.setOnAction(event -> outputData(getAllfileData(), false));
+        clear.setOnAction(event -> clearList(filelist));
         setChoice();
     }
 
@@ -75,7 +78,6 @@ public class Controller implements EventHandler<ActionEvent> {
         toMinute.setItems(minute_second);
         fromSecond.setItems(minute_second);
         toSecond.setItems(minute_second);
-
         fromHour.getSelectionModel().select(Calendar.getInstance().get(Calendar.HOUR_OF_DAY));
         toHour.getSelectionModel().select(Calendar.getInstance().get(Calendar.HOUR_OF_DAY));
         fromMinute.getSelectionModel().select(Calendar.getInstance().get(Calendar.MINUTE));
@@ -131,35 +133,44 @@ public class Controller implements EventHandler<ActionEvent> {
         gakuseki.requestFocus();
     }
 
-    public List<File> selectFiles() {
+    public void addDraftFiles() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("学籍ファイル選択");
         fileChooser.setInitialFileName(DateUtils.getDefaultFileName() + ".txt");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("numbers file", "*.txt", "*.bin", "*.db"));
         fileChooser.setInitialDirectory(new File("./"));
-        return fileChooser.showOpenMultipleDialog(stage);
+        List<File> files = fileChooser.showOpenMultipleDialog(stage);
+        files.forEach(f -> filelist.getItems().add(0, new Label(f.getPath())));
     }
 
-    public Set<String> getAllfileData(List<File> files) throws IOException {
+    public void clearList(ListView list) {
+        list.getItems().clear();
+    }
+
+    public List<String> getAllfileData() {
         Set<String> numbers = new HashSet<>();
-        for (File file : files) {
-            String[] tmp = file.getName().split(".");
+        for (Object path : filelist.getItems()) {
+            File file = new File(((Label) path).getText());
+            String[] tmp = file.getName().split("\\.");
             switch (tmp[tmp.length - 1]) {
                 case "txt":
                     numbers.addAll(readFile(file.getPath()));
                     break;
                 case "bin":
-                    numbers.addAll(OldVersions.readOldBinary(stage));
+                    numbers.addAll(OldVersions.read(file));
                     break;
                 case "db":
                     numbers.addAll(DataBase.readAllData(DB_NAME));
                     break;
             }
         }
-        return numbers;
+        List<String> res = new ArrayList<>();
+        res.addAll(numbers);
+
+        return res;
     }
 
-    public void saveDB2txt() throws IOException {
+    public void saveDB2txt() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("保存ファイル選択");
         fileChooser.setInitialFileName(DateUtils.getDefaultFileName() + ".txt");
@@ -171,16 +182,7 @@ public class Controller implements EventHandler<ActionEvent> {
             return;
         }
         List<String> list = new ArrayList<>();
-        list.addAll(
-                DataBase.readDB(DB_NAME,
-                        fromDate.getValue().toString().replaceAll("-", "") +
-                                String.format("%02d", Integer.parseInt((String) fromHour.getValue())) +
-                                String.format("%02d", Integer.parseInt((String) fromMinute.getValue())) +
-                                String.format("%02d", Integer.parseInt((String) fromSecond.getValue())),
-                        toDate.getValue().toString().replaceAll("-", "") +
-                                String.format("%02d", Integer.parseInt((String) toHour.getValue())) +
-                                String.format("%02d", Integer.parseInt((String) toMinute.getValue())) +
-                                String.format("%02d", Integer.parseInt((String) toSecond.getValue()))));
+        list.addAll(DataBase.readDB(DB_NAME, getFromDateString(), getToDateString()));
 
         save2txt(list, saveFile.getPath(), true);
 
@@ -198,11 +200,20 @@ public class Controller implements EventHandler<ActionEvent> {
         Label label = new Label(text);
         if (isError) label.setStyle("-fx-text-fill: red;");
         listView.getItems().add(0, label);
-        try {
-            save2txt(Arrays.asList(text), "activity.log", true);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        save2txt(Arrays.asList(text), "activity.log", true);
+    }
+
+    public void outputData(List<String> data, boolean isAppend) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("保存ファイル選択");
+        fileChooser.setInitialFileName(DateUtils.getDefaultFileName() + ".txt");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("text file", "*.txt"));
+        fileChooser.setInitialDirectory(new File("./"));
+        File saveFile = fileChooser.showSaveDialog(stage);
+        if (saveFile == null)
+            return;
+        save2txt(data, saveFile.getPath(), false);
+
     }
 
     /**
@@ -210,13 +221,13 @@ public class Controller implements EventHandler<ActionEvent> {
      *
      * @param data     テキストデータ
      * @param fileName 出力ファイル名
-     * @param add      ファイルに追記するかどうか
+     * @param isAppend ファイルに追記するかどうか
      * @throws IOException
      */
-    private void save2txt(List<String> data, String fileName, boolean add) throws IOException {
+    private void save2txt(List<String> data, String fileName, boolean isAppend) {
         BufferedWriter wr;
         try {
-            wr = new BufferedWriter(new FileWriter(fileName, add));
+            wr = new BufferedWriter(new FileWriter(fileName, isAppend));
             for (String datum : data) {
                 wr.write(datum + "\n");
             }
@@ -242,35 +253,17 @@ public class Controller implements EventHandler<ActionEvent> {
         return res;
     }
 
+    public String getFromDateString() {
+        return fromDate.getValue().toString().replaceAll("-", "") +
+                String.format("%02d", Integer.parseInt((String) fromHour.getValue())) +
+                String.format("%02d", Integer.parseInt((String) fromMinute.getValue())) +
+                String.format("%02d", Integer.parseInt((String) fromSecond.getValue()));
+    }
 
-    @Override
-    public void handle(ActionEvent event) {//ifじゃないといけない
-        Object src = event.getSource();
-        if (src.equals(fullscreen)) {
-            stage.setFullScreen(!stage.isFullScreen());
-        } else if (src.equals(gakuseki) || src.equals(reg)) {
-            insertData();
-        } else if (src.equals(binbutton)) {
-            try {
-                OldVersions.writeOldBinary(stage, fromDate.getValue().toString().replaceAll("-", "") +
-                                String.format("%02d", Integer.parseInt((String) fromHour.getValue())) +
-                                String.format("%02d", Integer.parseInt((String) fromMinute.getValue())) +
-                                String.format("%02d", Integer.parseInt((String) fromSecond.getValue())),
-                        toDate.getValue().toString().replaceAll("-", "") +
-                                String.format("%02d", Integer.parseInt((String) toHour.getValue())) +
-                                String.format("%02d", Integer.parseInt((String) toMinute.getValue())) +
-                                String.format("%02d", Integer.parseInt((String) toSecond.getValue())));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else if (src.equals(txtbutton)) {
-            try {
-                saveDB2txt();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }else if (src.equals(filepicker)){
-            selectFiles();
-        }
+    public String getToDateString() {
+        return toDate.getValue().toString().replaceAll("-", "") +
+                String.format("%02d", Integer.parseInt((String) toHour.getValue())) +
+                String.format("%02d", Integer.parseInt((String) toMinute.getValue())) +
+                String.format("%02d", Integer.parseInt((String) toSecond.getValue()));
     }
 }
