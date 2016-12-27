@@ -118,6 +118,10 @@ public class Controller {
         return true;
     }
 
+    /**
+     * ステージのセット
+     * @param stage
+     */
     public void setStage(Stage stage) {
         this.stage = stage;
         gakuseki.focusedProperty().addListener((observable, oldValue, newValue) -> {
@@ -127,12 +131,17 @@ public class Controller {
         });
     }
 
-
+    /**
+     * 入力欄にフォーカスが当たるようにする
+     */
     public void setFieldFocus() {
         tabpane.setFocusTraversable(false);
         gakuseki.requestFocus();
     }
 
+    /**
+     * ファイルを選択してリストに加える
+     */
     public void addDraftFiles() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("学籍ファイル選択");
@@ -143,10 +152,18 @@ public class Controller {
         files.forEach(f -> filelist.getItems().add(0, new Label(f.getPath())));
     }
 
+    /**
+     * リスト削除
+     * @param list
+     */
     public void clearList(ListView list) {
         list.getItems().clear();
     }
 
+    /**
+     * 全データを取得
+     * @return
+     */
     public List<String> getAllfileData() {
         Set<String> numbers = new HashSet<>();
         for (Object path : filelist.getItems()) {
@@ -170,6 +187,9 @@ public class Controller {
         return res;
     }
 
+    /**
+     * データベースの内容をテキストに保存する
+     */
     public void saveDB2txt() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("保存ファイル選択");
@@ -238,6 +258,11 @@ public class Controller {
         }
     }
 
+    /**
+     * テキストファイルの読み込み
+     * @param fName
+     * @return
+     */
     public Set<String> readFile(String fName) {
         Set<String> res = new HashSet<>();
         String str;
@@ -253,6 +278,10 @@ public class Controller {
         return res;
     }
 
+    /**
+     * 始まりの日付取得
+     * @return
+     */
     public String getFromDateString() {
         return fromDate.getValue().toString().replaceAll("-", "") +
                 String.format("%02d", Integer.parseInt((String) fromHour.getValue())) +
@@ -260,6 +289,10 @@ public class Controller {
                 String.format("%02d", Integer.parseInt((String) fromSecond.getValue()));
     }
 
+    /**
+     * 終わりの日付取得
+     * @return
+     */
     public String getToDateString() {
         return toDate.getValue().toString().replaceAll("-", "") +
                 String.format("%02d", Integer.parseInt((String) toHour.getValue())) +
