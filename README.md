@@ -9,9 +9,5 @@
 https://github.com/xerial/sqlite-jdbc  
   
   
-- Apache POI  
-このソフトウェアはApache POIを使用して作られています。ライセンス及びソースコードは以下のところにあります。  
-http://poi.apache.org
-  
 - AttendanceCheckerについて  
 apache2.0です。
