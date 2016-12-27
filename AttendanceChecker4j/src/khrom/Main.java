@@ -10,7 +10,7 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../layout/main.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("layout/main.fxml"));
         Parent root = fxmlLoader.load();
         primaryStage.setTitle("出欠とるよ！");
         primaryStage.setScene(new Scene(root, 620, 400));
