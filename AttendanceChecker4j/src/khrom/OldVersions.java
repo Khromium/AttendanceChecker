@@ -98,7 +98,7 @@ public class OldVersions {
      *
      * @throws IOException
      */
-    public static void writeOldBinary(Stage stage, String fromDate, String toDate) {
+    public static void writeOldBinary(Stage stage,File dbName, String fromDate, String toDate) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("保存ファイル選択");
         fileChooser.setInitialFileName(DateUtils.getDefaultFileName() + ".bin");
@@ -110,7 +110,7 @@ public class OldVersions {
         }
         List<String> list = new ArrayList<>();
         list.addAll(
-                DataBase.readDB(Controller.DB_NAME, fromDate, toDate));
+                DataBase.readDB(dbName, fromDate, toDate));
         OldVersions.write(saveFile, list);
 
     }

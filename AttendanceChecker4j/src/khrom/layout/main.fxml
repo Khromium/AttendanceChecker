@@ -163,6 +163,7 @@
                                     <children>
                                         <Button fx:id="txtbutton" mnemonicParsing="false" text="テキストファイル"/>
                                         <Button fx:id="binbutton" mnemonicParsing="false" text="バイナリ(古いのと互換)"/>
+                                        <Button fx:id="dbbutton" mnemonicParsing="false" text="データベース形式"/>
                                         <!--<Button fx:id="excelButton" mnemonicParsing="false" onAction="#saveDB2excel"-->
                                         <!--text="エクセル"/>-->
                                     </children>

@@ -15,7 +15,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 public class Controller {
-    public static String DB_NAME = "gakuseki.db";
+    private String DB_NAME = "gakuseki.db";
     private Stage stage;
     @FXML
     private TextField gakuseki;
@@ -36,7 +36,7 @@ public class Controller {
     @FXML
     private Button reg;
     @FXML
-    private Button binbutton, txtbutton;
+    private Button binbutton, txtbutton, dbbutton;
     @FXML
     private Button filepicker, output, clear;
     @FXML
@@ -53,11 +53,12 @@ public class Controller {
         fullscreen.setOnAction(event -> stage.setFullScreen(!stage.isFullScreen()));
         gakuseki.setOnAction(event -> insertData());
         reg.setOnAction(event -> insertData());
-        binbutton.setOnAction(event -> OldVersions.writeOldBinary(stage, getFromDateString(), getToDateString()));
+        binbutton.setOnAction(event -> OldVersions.writeOldBinary(stage,new File(DB_NAME), getFromDateString(), getToDateString()));
         txtbutton.setOnAction(event -> saveDB2txt());
         filepicker.setOnAction(event -> addDraftFiles());
         output.setOnAction(event -> outputData(getAllfileData(), false));
         clear.setOnAction(event -> clearList(filelist));
+        dbbutton.setOnAction(event ->saveDB2DB());
         setChoice();
     }
 
@@ -93,7 +94,7 @@ public class Controller {
 
         if (isGakuseki(gakuseki.getText())) {
             String numberString = gakuseki.getText().length() == 10 ? new StringBuilder(gakuseki.getText()).substring(5) : gakuseki.getText();
-            DataBase.addDB(DB_NAME, numberString);
+            DataBase.addDB(new File(DB_NAME), numberString);
             gakusekiNumber.setText(numberString + "を追加しました");
             history.setText(String.valueOf(Integer.parseInt(history.getText()) + 1));
             logger("add:" + numberString, false);
@@ -120,6 +121,7 @@ public class Controller {
 
     /**
      * ステージのセット
+     *
      * @param stage
      */
     public void setStage(Stage stage) {
@@ -154,6 +156,7 @@ public class Controller {
 
     /**
      * リスト削除
+     *
      * @param list
      */
     public void clearList(ListView list) {
@@ -162,6 +165,7 @@ public class Controller {
 
     /**
      * 全データを取得
+     *
      * @return
      */
     public List<String> getAllfileData() {
@@ -177,7 +181,7 @@ public class Controller {
                     numbers.addAll(OldVersions.read(file));
                     break;
                 case "db":
-                    numbers.addAll(DataBase.readAllData(DB_NAME));
+                    numbers.addAll(DataBase.readAllData(new File(  DB_NAME)));
                     break;
             }
         }
@@ -202,10 +206,27 @@ public class Controller {
             return;
         }
         List<String> list = new ArrayList<>();
-        list.addAll(DataBase.readDB(DB_NAME, getFromDateString(), getToDateString()));
+        list.addAll(DataBase.readDB(new File(DB_NAME), getFromDateString(), getToDateString()));
 
         save2txt(list, saveFile.getPath(), true);
 
+    }
+
+    /**
+     * データベースの内容をデータベースに保存する
+     */
+    public void saveDB2DB() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("保存ファイル選択");
+        fileChooser.setInitialFileName(DateUtils.getDefaultFileName() + ".db");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("database file", "*.db"));
+        fileChooser.setInitialDirectory(new File("./"));
+        File saveFile = fileChooser.showSaveDialog(stage);
+        if (saveFile == null) {
+            logger("ファイルが選択されていません", false);
+            return;
+        }
+        DataBase.dbCpy(new File( DB_NAME), saveFile, getFromDateString(), getToDateString());
     }
 
 
@@ -260,6 +281,7 @@ public class Controller {
 
     /**
      * テキストファイルの読み込み
+     *
      * @param fName
      * @return
      */
@@ -280,6 +302,7 @@ public class Controller {
 
     /**
      * 始まりの日付取得
+     *
      * @return
      */
     public String getFromDateString() {
@@ -291,6 +314,7 @@ public class Controller {
 
     /**
      * 終わりの日付取得
+     *
      * @return
      */
     public String getToDateString() {
