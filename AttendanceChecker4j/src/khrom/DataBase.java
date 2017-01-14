@@ -143,7 +143,7 @@ public class DataBase {
             ResultSet rs = pstmtOrigin.executeQuery();
             int i=0;
             while (rs.next()) {
-                pstmtTo.setInt(1,rs.getInt(1));
+                pstmtTo.setDouble(1,rs.getDouble(1));
                 pstmtTo.setString(2,rs.getString(2));
                 pstmtTo.addBatch();
                 i++;
