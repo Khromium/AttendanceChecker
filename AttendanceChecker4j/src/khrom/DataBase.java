@@ -178,12 +178,9 @@ public class DataBase {
         Properties prop = new Properties();
         prop.put("journal_mode", "MEMORY");//必要はないが高速化のため
         prop.put("sync_mode", "OFF");//高速化のため
-        String dbHead = "jdbc:sqlite:./";
+        String dbHead = "jdbc:sqlite:";
         PreparedStatement pstmtOrigin;
-
         try {
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTimeZone(TimeZone.getTimeZone("Asia/Tokyo"));
             Class.forName("org.sqlite.JDBC");
             connOrigin = DriverManager.getConnection(dbHead + dbName.getAbsolutePath(), prop);
             connOrigin.setAutoCommit(false);
